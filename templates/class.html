@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ class_info.name }} - ClassDojo Clone{% endblock %}
+
+{% block content %}
+<div class="class-container">
+    <!-- Student/Group Tabs -->
+    <div class="view-tabs">
+        <div class="tab-buttons">
+            <button class="tab-btn active" data-view="students">Students</button>
+            <button class="tab-btn" data-view="groups">Groups</button>
+        </div>
+    </div>
+
+    <!-- Class Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="stat-number text-primary">{{ students|length }}</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="stat-number text-success">{{ students|sum(attribute='points') }}</div>
+                    <div class="stat-label">Total Points</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="stat-number text-warning">{{ (students|sum(attribute='points') / students|length)|round(1) if students|length > 0 else 0 }}</div>
+                    <div class="stat-label">Avg Points</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="stat-number text-info">95%</div>
+                    <div class="stat-label">Engagement</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Skills Being Practiced</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for skill in skills %}
+                        <div class="col-md-2 col-sm-4 col-6 mb-3">
+                            <div class="text-center">
+                                <div class="skill-badge skill-{{ skill.name.lower() }} w-100">
+                                    <div class="mb-1">{{ skill.icon }}</div>
+                                    <div class="small">{{ skill.name }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Students Grid -->
+    <div class="students-grid" id="studentsGrid">
+        <!-- Whole Class Card -->
+        <div class="whole-class-card" onclick="selectWholeClass()">
+            <div class="whole-class-title">Whole Class</div>
+            <div class="whole-class-avatars">
+                {% for student in students[:8] %}
+                <div class="whole-class-avatar monster-{{ ['blue', 'pink', 'yellow', 'purple', 'green', 'orange', 'red', 'teal'][loop.index0 % 8] }}">
+                    {{ student.avatar }}
+                </div>
+                {% endfor %}
+            </div>
+            <div class="whole-class-points">{{ students|sum(attribute='points') }}</div>
+        </div>
+
+        <!-- Individual Student Cards -->
+        {% for student in students %}
+        <div class="student-card" data-student-id="{{ student.id }}" onclick="toggleStudentSelection({{ student.id }})">
+            <div class="student-avatar monster-{{ ['blue', 'pink', 'yellow', 'purple', 'green', 'orange', 'red', 'teal'][loop.index0 % 8] }}">
+                {{ student.avatar }}
+            </div>
+            <div class="student-id">{{ '%02d'|format(loop.index) }}{{ student.name.split()[0][:2].upper() }}</div>
+            <div class="student-name">{{ student.name }}</div>
+            <div class="student-points">{{ student.points }}</div>
+        </div>
+        {% endfor %}
+
+        <!-- Add Student Card -->
+        <div class="add-student-card" onclick="addStudent()">
+            <div class="add-student-icon">+</div>
+            <div class="add-student-text">Add students</div>
+        </div>
+    </div>
+</div>
+
+<!-- Award Points Modal -->
+<div class="modal fade" id="awardPointsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Award Points</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('award_points') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="student_id" id="awardStudentId">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Skill</label>
+                        <select name="skill_id" class="form-select" required>
+                            {% for skill in skills %}
+                            <option value="{{ skill.id }}">{{ skill.icon }} {{ skill.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Points</label>
+                        <select name="points" class="form-select" required>
+                            <option value="1">1 point</option>
+                            <option value="2">2 points</option>
+                            <option value="3">3 points</option>
+                            <option value="5">5 points</option>
+                            <option value="10">10 points</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Reason (optional)</label>
+                        <textarea name="reason" class="form-control" rows="3" placeholder="Why are you awarding these points?"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Award Points</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function awardPoints(studentId) {
+    document.getElementById('awardStudentId').value = studentId;
+    new bootstrap.Modal(document.getElementById('awardPointsModal')).show();
+}
+
+// View mode toggle
+document.getElementById('listView').addEventListener('change', function() {
+    if (this.checked) {
+        document.getElementById('studentsGrid').classList.add('row-cols-1');
+        document.querySelectorAll('.student-card').forEach(card => {
+            card.classList.add('d-flex', 'align-items-center');
+            card.querySelector('.student-avatar').style.fontSize = '2rem';
+            card.querySelector('.student-avatar').style.marginBottom = '0';
+            card.querySelector('.student-avatar').style.marginRight = '1rem';
+        });
+    }
+});
+
+document.getElementById('gridView').addEventListener('change', function() {
+    if (this.checked) {
+        document.getElementById('studentsGrid').classList.remove('row-cols-1');
+        document.querySelectorAll('.student-card').forEach(card => {
+            card.classList.remove('d-flex', 'align-items-center');
+            card.querySelector('.student-avatar').style.fontSize = '3rem';
+            card.querySelector('.student-avatar').style.marginBottom = '1rem';
+            card.querySelector('.student-avatar').style.marginRight = '0';
+        });
+    }
+});
+</script>
+{% endblock %}

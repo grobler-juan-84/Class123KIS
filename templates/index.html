@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}My Classes - ClassDojo Clone{% endblock %}
+
+{% block content %}
+<div class="classes-page">
+    <h2 class="page-title">My Classes</h2>
+    
+    <div class="classes-grid">
+        {% for class in classes %}
+        <div class="class-card" onclick="window.location.href='{{ url_for('class_view', class_id=class.id) }}'">
+            <div class="class-header">
+                <div class="class-icon">
+                    <div class="globe-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                </div>
+                <button class="settings-btn" onclick="event.stopPropagation(); openClassSettings({{ class.id }})">
+                    <i class="fas fa-cog"></i>
+                </button>
+                {% if loop.first %}
+                <div class="notification-dot"></div>
+                {% endif %}
+            </div>
+            <div class="class-content">
+                <h3 class="class-name">{{ class.name }}</h3>
+                <p class="student-count">{{ class.students|length }} Students 0 Parents</p>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <!-- Add New Class Card -->
+        <div class="class-card add-class-card" onclick="addNewClass()">
+            <div class="add-class-icon">
+                <i class="fas fa-plus"></i>
+            </div>
+            <div class="add-class-text">New class</div>
+        </div>
+    </div>
+</div>
+
+<!-- Class Settings Modal -->
+<div class="modal fade" id="classSettingsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Class Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Class settings functionality would be implemented here.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function openClassSettings(classId) {
+    new bootstrap.Modal(document.getElementById('classSettingsModal')).show();
+}
+
+function addNewClass() {
+    alert('Add new class functionality would be implemented here');
+}
+</script>
+{% endblock %}

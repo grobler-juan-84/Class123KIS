@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ClassDojo Clone{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="sidebar-layout">
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="school-logo">
+                <div class="monster-avatar monster-green">👾</div>
+            </div>
+            <div class="school-info">
+                <h6 class="school-name">Korean International School</h6>
+                <small class="teacher-count">24 teachers</small>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-book-open"></i>
+                        <span>Story</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-calendar"></i>
+                        <span>Calendar</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-comments"></i>
+                        <span>Chats</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-star"></i>
+                        <span>Points</span>
+                        <span class="badge badge-new">NEW</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-address-book"></i>
+                        <span>Directory</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Insights</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="sidebar-classes">
+            <h6 class="classes-title">Your Classes</h6>
+            <ul class="class-list">
+                <li class="class-item">
+                    <a href="#" class="class-link">All classes</a>
+                </li>
+                <li class="class-item">
+                    <a href="#" class="class-link new-class">
+                        <i class="fas fa-plus"></i>
+                        <span>New Class</span>
+                    </a>
+                </li>
+                {% for class in classes %}
+                <li class="class-item {% if loop.first %}active{% endif %}">
+                    <a href="{{ url_for('class_view', class_id=class.id) }}" class="class-link">
+                        {{ class.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            
+            <div class="archived-classes">
+                <button class="btn-archived" data-bs-toggle="collapse" data-bs-target="#archivedClasses">
+                    <i class="fas fa-chevron-down"></i>
+                    <span>Archived Classes</span>
+                </button>
+                <div class="collapse" id="archivedClasses">
+                    <ul class="class-list">
+                        <li class="class-item">
+                            <a href="#" class="class-link">Old Class 1</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sidebar-footer">
+            <a href="#" class="footer-link">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Teacher resources</span>
+            </a>
+            <a href="#" class="footer-link">
+                <i class="fas fa-question-circle"></i>
+                <span>Support</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content-wrapper">
+        <!-- Top Navigation -->
+        <nav class="top-navbar">
+            <div class="navbar-content">
+                <div class="class-context">
+                    <h5 class="current-class">4-5 Homeroom (2025)</h5>
+                    <div class="class-tabs">
+                        <a href="#" class="tab-link active">Classroom</a>
+                        <a href="#" class="tab-link">Class Story</a>
+                        <a href="#" class="tab-link">Chats</a>
+                        <a href="#" class="tab-link">Calendar</a>
+                        <a href="#" class="tab-link">Dojo Islands</a>
+                    </div>
+                </div>
+                
+                <div class="navbar-actions">
+                    <button class="btn btn-primary btn-invite">
+                        <i class="fas fa-user-plus"></i>
+                        Invite families
+                    </button>
+                    <div class="navbar-icons">
+                        <button class="icon-btn">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <button class="icon-btn">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                        <button class="icon-btn">
+                            <i class="fas fa-user-circle"></i>
+                        </button>
+                        <div class="dropdown">
+                            <button class="icon-btn" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">Settings</a></li>
+                                <li><a class="dropdown-item" href="#">Help</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#">Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Bottom Footer Menu -->
+    <div class="bottom-footer">
+        <div class="footer-content">
+            <div class="footer-item">
+                <i class="fas fa-toolbox"></i>
+                <span>Toolkit</span>
+            </div>
+            <div class="footer-item">
+                <i class="fas fa-clock"></i>
+                <span>Attendance</span>
+            </div>
+            <div class="footer-item active" id="multiSelectBtn">
+                <i class="fas fa-check-square"></i>
+                <span>Select multiple</span>
+            </div>
+            <div class="footer-item">
+                <i class="fas fa-random"></i>
+                <span>Random</span>
+            </div>
+            <div class="footer-item">
+                <i class="fas fa-stopwatch"></i>
+                <span>Timer</span>
+            </div>
+            <div class="footer-item">
+                <i class="fas fa-folder">
+                    <span class="badge badge-red">2</span>
+                </i>
+                <span>Portfolios</span>
+            </div>
+            <div class="footer-item">
+                <i class="fas fa-lightbulb"></i>
+                <span>Big Ideas</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
