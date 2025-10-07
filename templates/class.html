@@ -9,14 +9,25 @@
         <div class="tab-buttons">
             <button class="tab-btn active" data-view="students">Students</button>
             <button class="tab-btn" data-view="groups">Groups</button>
-            <button class="tab-btn" data-view="stats">Stats</button>
+            <button class="tab-btn" data-view="stats">Class Stats</button>
+            <button class="tab-btn" data-view="students-stats">Students Stats</button>
+        </div>
+        
+        <!-- Multi-select action buttons -->
+        <div class="multi-select-actions" id="multiSelectActions" style="display: none;">
+            <button class="btn btn-outline-primary btn-sm" id="selectAllBtn" onclick="selectAllStudents()">
+                <i class="fas fa-check-double me-1"></i>Select All
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" id="selectNoneBtn" onclick="selectNoneStudents()">
+                <i class="fas fa-times me-1"></i>Select None
+            </button>
         </div>
     </div>
 
     <!-- Students Grid -->
     <div class="students-grid" id="studentsGrid">
         <!-- Whole Class Card -->
-        <div class="whole-class-card" onclick="selectWholeClass()">
+        <div class="whole-class-card" onclick="handleWholeClassClick()">
             <div class="whole-class-title">Whole Class</div>
             <div class="whole-class-avatars">
                 {% for student in students[:8] %}
@@ -30,7 +41,7 @@
 
         <!-- Individual Student Cards -->
         {% for student in students %}
-        <div class="student-card" data-student-id="{{ student.id }}" onclick="toggleStudentSelection({{ student.id }})">
+        <div class="student-card" data-student-id="{{ student.id }}" onclick="handleStudentCardClick({{ student.id }})">
             <div class="student-avatar monster-{{ ['blue', 'pink', 'yellow', 'purple', 'green', 'orange', 'red', 'teal'][loop.index0 % 8] }}">
                 {{ student.avatar }}
             </div>
@@ -137,6 +148,11 @@
             <form method="POST" action="{{ url_for('award_points') }}">
                 <div class="modal-body">
                     <input type="hidden" name="student_id" id="awardStudentId">
+                    <input type="hidden" name="selected_students" id="selectedStudents">
+                    <div id="selectedStudentsInfo" class="mb-3" style="display: none;">
+                        <label class="form-label">Selected Students</label>
+                        <div id="selectedStudentsList" class="form-control-plaintext"></div>
+                    </div>
                     
                     <div class="mb-3">
                         <label class="form-label">Skill</label>
@@ -149,13 +165,19 @@
                     
                     <div class="mb-3">
                         <label class="form-label">Points</label>
-                        <select name="points" class="form-select" required>
+                        <select name="points" id="pointsSelect" class="form-select" required>
                             <option value="1">1 point</option>
                             <option value="2">2 points</option>
                             <option value="3">3 points</option>
                             <option value="5">5 points</option>
                             <option value="10">10 points</option>
+                            <option value="custom">Custom amount</option>
                         </select>
+                    </div>
+                    
+                    <div class="mb-3" id="customPointsDiv" style="display: none;">
+                        <label class="form-label">Custom Points</label>
+                        <input type="number" name="custom_points" id="customPoints" class="form-control" min="1" max="100" placeholder="Enter custom points">
                     </div>
                     
                     <div class="mb-3">
@@ -171,14 +193,302 @@
         </div>
     </div>
 </div>
+
+<!-- Award Points to Whole Class Modal -->
+<div class="modal fade" id="awardWholeClassModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Award Points to Whole Class</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('award_points') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="whole_class" value="true">
+                    <input type="hidden" name="class_id" value="{{ class_info.id }}">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Skill</label>
+                        <select name="skill_id" class="form-select" required>
+                            {% for skill in skills %}
+                            <option value="{{ skill.id }}">{{ skill.icon }} {{ skill.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Points</label>
+                        <select name="points" id="wholeClassPointsSelect" class="form-select" required>
+                            <option value="1">1 point</option>
+                            <option value="2">2 points</option>
+                            <option value="3">3 points</option>
+                            <option value="5">5 points</option>
+                            <option value="10">10 points</option>
+                            <option value="custom">Custom amount</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="wholeClassCustomPointsDiv" style="display: none;">
+                        <label class="form-label">Custom Points</label>
+                        <input type="number" name="custom_points" id="wholeClassCustomPoints" class="form-control" min="1" max="100" placeholder="Enter custom points">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Reason (optional)</label>
+                        <textarea name="reason" class="form-control" rows="3" placeholder="Why are you awarding these points to the whole class?"></textarea>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        This will award points to all {{ students|length }} students in the class.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Award Points to Whole Class</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
 function awardPoints(studentId) {
     document.getElementById('awardStudentId').value = studentId;
+    document.getElementById('selectedStudents').value = '';
+    document.getElementById('selectedStudentsInfo').style.display = 'none';
     new bootstrap.Modal(document.getElementById('awardPointsModal')).show();
 }
+
+function awardPointsToSelected() {
+    if (window.selectedStudents && window.selectedStudents.size > 0) {
+        const selectedStudentsArray = Array.from(window.selectedStudents);
+        document.getElementById('awardStudentId').value = '';
+        document.getElementById('selectedStudents').value = selectedStudentsArray.join(',');
+        
+        // Show selected students info
+        const selectedStudentsInfo = document.getElementById('selectedStudentsInfo');
+        const selectedStudentsList = document.getElementById('selectedStudentsList');
+        selectedStudentsInfo.style.display = 'block';
+        selectedStudentsList.textContent = `${selectedStudentsArray.length} student(s) selected`;
+        
+        new bootstrap.Modal(document.getElementById('awardPointsModal')).show();
+    }
+}
+
+function handleWholeClassClick() {
+    const activeTab = document.querySelector('.tab-btn.active');
+    const currentView = activeTab.getAttribute('data-view');
+    
+    if (currentView === 'students') {
+        // Check if we're in multi-select mode
+        if (window.multiSelectMode) {
+            // In multi-select mode, select all students
+            if (typeof window.selectWholeClass === 'function') {
+                window.selectWholeClass();
+            } else {
+                selectWholeClassLocal();
+            }
+        } else {
+            // Show whole class modal for awarding points
+            new bootstrap.Modal(document.getElementById('awardWholeClassModal')).show();
+        }
+    } else if (currentView === 'groups') {
+        // In groups tab, allow multi-select if enabled
+        if (window.multiSelectMode) {
+            if (typeof window.selectWholeClass === 'function') {
+                window.selectWholeClass();
+            } else {
+                selectWholeClassLocal();
+            }
+        } else {
+            // Show whole class modal for awarding points
+            new bootstrap.Modal(document.getElementById('awardWholeClassModal')).show();
+        }
+    } else if (currentView === 'students-stats') {
+        // Navigate to class stats or show class overview
+        alert('Class statistics view would be implemented here');
+    } else if (currentView === 'stats') {
+        // Navigate to class stats or show class overview
+        alert('Class statistics view would be implemented here');
+    }
+}
+
+function selectWholeClassLocal() {
+    if (!window.selectedStudents) {
+        window.selectedStudents = new Set();
+    }
+    
+    // Select all students
+    const studentCards = document.querySelectorAll('.student-card[data-student-id]');
+    studentCards.forEach(card => {
+        const studentId = parseInt(card.dataset.studentId);
+        window.selectedStudents.add(studentId);
+    });
+    
+    updateStudentCardsLocal();
+    showAwardPointsButtonLocal();
+}
+
+function selectAllStudents() {
+    if (!window.selectedStudents) {
+        window.selectedStudents = new Set();
+    }
+    
+    // Select all students
+    const studentCards = document.querySelectorAll('.student-card[data-student-id]');
+    studentCards.forEach(card => {
+        const studentId = parseInt(card.dataset.studentId);
+        window.selectedStudents.add(studentId);
+    });
+    
+    updateStudentCardsLocal();
+    showAwardPointsButtonLocal();
+}
+
+function selectNoneStudents() {
+    if (window.selectedStudents) {
+        window.selectedStudents.clear();
+    }
+    
+    updateStudentCardsLocal();
+    hideAwardPointsButtonLocal();
+}
+
+function handleStudentCardClick(studentId) {
+    const activeTab = document.querySelector('.tab-btn.active');
+    const currentView = activeTab.getAttribute('data-view');
+    
+    if (currentView === 'students') {
+        // Check if we're in multi-select mode
+        if (window.multiSelectMode) {
+            // Use the existing multi-select functionality
+            if (typeof window.toggleStudentSelection === 'function') {
+                window.toggleStudentSelection(studentId);
+            } else {
+                // Fallback: implement basic multi-select
+                toggleStudentSelectionLocal(studentId);
+            }
+        } else {
+            // Show modal for awarding points to single student
+            awardPoints(studentId);
+        }
+    } else if (currentView === 'groups') {
+        // In groups tab, allow multi-select if enabled
+        if (window.multiSelectMode) {
+            if (typeof window.toggleStudentSelection === 'function') {
+                window.toggleStudentSelection(studentId);
+            } else {
+                toggleStudentSelectionLocal(studentId);
+            }
+        } else {
+            // Show modal for awarding points to single student
+            awardPoints(studentId);
+        }
+    } else if (currentView === 'students-stats') {
+        // Navigate to student.html page
+        window.location.href = `/student/${studentId}`;
+    } else if (currentView === 'stats') {
+        // Navigate to student.html page
+        window.location.href = `/student/${studentId}`;
+    }
+}
+
+// Local implementation of multi-select functionality
+function toggleStudentSelectionLocal(studentId) {
+    if (!window.selectedStudents) {
+        window.selectedStudents = new Set();
+    }
+    
+    if (window.selectedStudents.has(studentId)) {
+        window.selectedStudents.delete(studentId);
+    } else {
+        window.selectedStudents.add(studentId);
+    }
+    
+    updateStudentCardsLocal();
+    
+    // Show award points button if students are selected
+    if (window.selectedStudents.size > 0) {
+        showAwardPointsButtonLocal();
+    } else {
+        hideAwardPointsButtonLocal();
+    }
+}
+
+function updateStudentCardsLocal() {
+    const studentCards = document.querySelectorAll('.student-card[data-student-id]');
+    studentCards.forEach(card => {
+        const studentId = parseInt(card.dataset.studentId);
+        if (window.selectedStudents && window.selectedStudents.has(studentId)) {
+            card.classList.add('selected');
+        } else {
+            card.classList.remove('selected');
+        }
+    });
+}
+
+function showAwardPointsButtonLocal() {
+    let awardBtn = document.getElementById('awardSelectedBtn');
+    if (!awardBtn) {
+        awardBtn = document.createElement('button');
+        awardBtn.id = 'awardSelectedBtn';
+        awardBtn.className = 'btn btn-primary position-fixed';
+        awardBtn.style.cssText = 'top: 20px; right: 20px; z-index: 1000;';
+        awardBtn.innerHTML = '<i class="fas fa-star me-1"></i>Award Points to Selected';
+        awardBtn.onclick = awardPointsToSelected;
+        document.body.appendChild(awardBtn);
+    }
+    awardBtn.style.display = 'block';
+}
+
+function hideAwardPointsButtonLocal() {
+    const awardBtn = document.getElementById('awardSelectedBtn');
+    if (awardBtn) {
+        awardBtn.style.display = 'none';
+    }
+}
+
+// Handle custom points functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Individual student modal custom points
+    const pointsSelect = document.getElementById('pointsSelect');
+    const customPointsDiv = document.getElementById('customPointsDiv');
+    const customPointsInput = document.getElementById('customPoints');
+    
+    if (pointsSelect && customPointsDiv && customPointsInput) {
+        pointsSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customPointsDiv.style.display = 'block';
+                customPointsInput.required = true;
+            } else {
+                customPointsDiv.style.display = 'none';
+                customPointsInput.required = false;
+                customPointsInput.value = '';
+            }
+        });
+    }
+    
+    // Whole class modal custom points
+    const wholeClassPointsSelect = document.getElementById('wholeClassPointsSelect');
+    const wholeClassCustomPointsDiv = document.getElementById('wholeClassCustomPointsDiv');
+    const wholeClassCustomPointsInput = document.getElementById('wholeClassCustomPoints');
+    
+    if (wholeClassPointsSelect && wholeClassCustomPointsDiv && wholeClassCustomPointsInput) {
+        wholeClassPointsSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                wholeClassCustomPointsDiv.style.display = 'block';
+                wholeClassCustomPointsInput.required = true;
+            } else {
+                wholeClassCustomPointsDiv.style.display = 'none';
+                wholeClassCustomPointsInput.required = false;
+                wholeClassCustomPointsInput.value = '';
+            }
+        });
+    }
+});
 
 // Tab functionality
 document.addEventListener('DOMContentLoaded', function() {
@@ -186,6 +496,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const studentsGrid = document.getElementById('studentsGrid');
     const groupsTab = document.getElementById('groupsTab');
     const statsTab = document.getElementById('statsTab');
+    const multiSelectBtn = document.getElementById('multiSelectBtn');
 
     tabButtons.forEach(button => {
         button.addEventListener('click', function() {
@@ -201,8 +512,36 @@ document.addEventListener('DOMContentLoaded', function() {
             groupsTab.style.display = 'none';
             statsTab.style.display = 'none';
             
+            // Show/hide multi-select button and actions based on tab and reset multi-select mode
+            const multiSelectActions = document.getElementById('multiSelectActions');
+            
+            if (multiSelectBtn) {
+                if (view === 'students' || view === 'groups') {
+                    multiSelectBtn.style.display = 'block';
+                    // Reset multi-select mode when switching between students and groups tabs
+                    if (window.multiSelectMode) {
+                        if (typeof window.toggleMultiSelectMode === 'function') {
+                            window.toggleMultiSelectMode();
+                        }
+                    }
+                } else {
+                    multiSelectBtn.style.display = 'none';
+                    // Exit multi-select mode when switching to stats tabs
+                    if (window.multiSelectMode) {
+                        if (typeof window.toggleMultiSelectMode === 'function') {
+                            window.toggleMultiSelectMode();
+                        }
+                    }
+                }
+            }
+            
+            // Hide multi-select actions when switching tabs
+            if (multiSelectActions) {
+                multiSelectActions.style.display = 'none';
+            }
+            
             // Show selected content
-            if (view === 'students') {
+            if (view === 'students' || view === 'students-stats') {
                 studentsGrid.style.display = 'block';
                 // Reset student cards to original layout
                 resetStudentCards();
@@ -274,3 +613,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+

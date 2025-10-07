@@ -115,7 +115,8 @@ def class_view(class_id):
                          class_info=class_info,
                          students=students,
                          teacher=teacher,
-                         skills=DUMMY_DATA['skills'])
+                         skills=DUMMY_DATA['skills'],
+                         classes=DUMMY_DATA['classes'])
 
 @app.route('/student/<int:student_id>')
 def student_view(student_id):
@@ -132,17 +133,39 @@ def student_view(student_id):
                          student=student,
                          class_info=class_info,
                          teacher=teacher,
-                         skills=DUMMY_DATA['skills'])
+                         skills=DUMMY_DATA['skills'],
+                         classes=DUMMY_DATA['classes'])
 
 @app.route('/award_points', methods=['POST'])
 def award_points():
-    """Award points to a student (dummy implementation)"""
+    """Award points to a student, multiple students, or whole class (dummy implementation)"""
     student_id = request.form.get('student_id')
+    selected_students = request.form.get('selected_students')
+    whole_class = request.form.get('whole_class')
+    class_id = request.form.get('class_id')
     skill_id = request.form.get('skill_id')
-    points = int(request.form.get('points', 1))
+    points = request.form.get('points')
+    custom_points = request.form.get('custom_points')
     
-    # In a real app, this would update the database
-    flash(f'Awarded {points} points to student!', 'success')
+    # Handle custom points
+    if points == 'custom' and custom_points:
+        points = int(custom_points)
+    else:
+        points = int(points)
+    
+    # Handle different scenarios
+    if whole_class and class_id:
+        # Award points to whole class
+        class_info = get_class_by_id(int(class_id))
+        students_in_class = get_students_by_class(int(class_id))
+        flash(f'Awarded {points} points to all {len(students_in_class)} students in {class_info["name"]}!', 'success')
+    elif selected_students:
+        # Award points to multiple selected students
+        student_ids = selected_students.split(',')
+        flash(f'Awarded {points} points to {len(student_ids)} student(s)!', 'success')
+    else:
+        # Award points to single student
+        flash(f'Awarded {points} points to student!', 'success')
     
     return redirect(request.referrer or url_for('index'))
 

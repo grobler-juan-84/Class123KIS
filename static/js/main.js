@@ -111,24 +111,39 @@ document.addEventListener('DOMContentLoaded', function() {
     window.selectWholeClass = selectWholeClass;
     window.addStudent = addStudent;
     window.toggleMultiSelectMode = toggleMultiSelectMode;
+    window.selectAllStudents = selectAllStudents;
+    window.selectNoneStudents = selectNoneStudents;
 });
 
 // Multi-select functions
 function toggleMultiSelectMode() {
     multiSelectMode = !multiSelectMode;
+    window.multiSelectMode = multiSelectMode; // Make it globally accessible
     const studentsGrid = document.getElementById('studentsGrid');
     const multiSelectBtn = document.getElementById('multiSelectBtn');
+    const multiSelectActions = document.getElementById('multiSelectActions');
     
     if (multiSelectMode) {
         studentsGrid.classList.add('multi-select-mode');
         multiSelectBtn.classList.add('active');
         multiSelectBtn.innerHTML = '<i class="fas fa-check-square"></i><span>Exit multi-select</span>';
+        
+        // Show multi-select action buttons
+        if (multiSelectActions) {
+            multiSelectActions.style.display = 'block';
+        }
     } else {
         studentsGrid.classList.remove('multi-select-mode');
         multiSelectBtn.classList.remove('active');
         multiSelectBtn.innerHTML = '<i class="fas fa-check-square"></i><span>Select multiple</span>';
         selectedStudents.clear();
+        window.selectedStudents = selectedStudents; // Make it globally accessible
         updateStudentCards();
+        
+        // Hide multi-select action buttons
+        if (multiSelectActions) {
+            multiSelectActions.style.display = 'none';
+        }
     }
 }
 
@@ -145,6 +160,7 @@ function toggleStudentSelection(studentId) {
         selectedStudents.add(studentId);
     }
     
+    window.selectedStudents = selectedStudents; // Make it globally accessible
     updateStudentCards();
     
     // Show award points button if students are selected
@@ -154,6 +170,9 @@ function toggleStudentSelection(studentId) {
         hideAwardPointsButton();
     }
 }
+
+// Make function globally accessible
+window.toggleStudentSelection = toggleStudentSelection;
 
 function selectWholeClass() {
     if (!multiSelectMode) {
@@ -208,11 +227,43 @@ function hideAwardPointsButton() {
 }
 
 function showAwardPointsModal() {
-    new bootstrap.Modal(document.getElementById('awardPointsModal')).show();
+    // Use the new function that handles multiple students
+    if (typeof awardPointsToSelected === 'function') {
+        awardPointsToSelected();
+    } else {
+        new bootstrap.Modal(document.getElementById('awardPointsModal')).show();
+    }
 }
 
 function addStudent() {
     alert('Add student functionality would be implemented here');
+}
+
+function selectAllStudents() {
+    if (!selectedStudents) {
+        selectedStudents = new Set();
+    }
+    
+    // Select all students
+    const studentCards = document.querySelectorAll('.student-card[data-student-id]');
+    studentCards.forEach(card => {
+        const studentId = parseInt(card.dataset.studentId);
+        selectedStudents.add(studentId);
+    });
+    
+    window.selectedStudents = selectedStudents; // Make it globally accessible
+    updateStudentCards();
+    showAwardPointsButton();
+}
+
+function selectNoneStudents() {
+    if (selectedStudents) {
+        selectedStudents.clear();
+    }
+    
+    window.selectedStudents = selectedStudents; // Make it globally accessible
+    updateStudentCards();
+    hideAwardPointsButton();
 }
 
 // Utility functions
