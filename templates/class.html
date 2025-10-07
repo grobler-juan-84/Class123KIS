@@ -4,72 +4,12 @@
 
 {% block content %}
 <div class="class-container">
-    <!-- Student/Group Tabs -->
+    <!-- Student/Group/Stats Tabs -->
     <div class="view-tabs">
         <div class="tab-buttons">
             <button class="tab-btn active" data-view="students">Students</button>
             <button class="tab-btn" data-view="groups">Groups</button>
-        </div>
-    </div>
-
-    <!-- Class Stats -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <div class="stat-number text-primary">{{ students|length }}</div>
-                    <div class="stat-label">Total Students</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <div class="stat-number text-success">{{ students|sum(attribute='points') }}</div>
-                    <div class="stat-label">Total Points</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <div class="stat-number text-warning">{{ (students|sum(attribute='points') / students|length)|round(1) if students|length > 0 else 0 }}</div>
-                    <div class="stat-label">Avg Points</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <div class="stat-number text-info">95%</div>
-                    <div class="stat-label">Engagement</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Skills Overview -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Skills Being Practiced</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        {% for skill in skills %}
-                        <div class="col-md-2 col-sm-4 col-6 mb-3">
-                            <div class="text-center">
-                                <div class="skill-badge skill-{{ skill.name.lower() }} w-100">
-                                    <div class="mb-1">{{ skill.icon }}</div>
-                                    <div class="small">{{ skill.name }}</div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
+            <button class="tab-btn" data-view="stats">Stats</button>
         </div>
     </div>
 
@@ -104,6 +44,84 @@
         <div class="add-student-card" onclick="addStudent()">
             <div class="add-student-icon">+</div>
             <div class="add-student-text">Add students</div>
+        </div>
+    </div>
+
+    <!-- Groups Tab Content -->
+    <div class="tab-content" id="groupsTab" style="display: none;">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5>Groups functionality coming soon!</h5>
+                        <p class="text-muted">Group management features will be available here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Tab Content -->
+    <div class="tab-content" id="statsTab" style="display: none;">
+        <!-- Class Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="stat-number text-primary">{{ students|length }}</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="stat-number text-success">{{ students|sum(attribute='points') }}</div>
+                        <div class="stat-label">Total Points</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="stat-number text-warning">{{ (students|sum(attribute='points') / students|length)|round(1) if students|length > 0 else 0 }}</div>
+                        <div class="stat-label">Avg Points</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="stat-number text-info">95%</div>
+                        <div class="stat-label">Engagement</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skills Overview -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Skills Being Practiced</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for skill in skills %}
+                            <div class="col-md-2 col-sm-4 col-6 mb-3">
+                                <div class="text-center">
+                                    <div class="skill-badge skill-{{ skill.name.lower() }} w-100">
+                                        <div class="mb-1">{{ skill.icon }}</div>
+                                        <div class="small">{{ skill.name }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -162,27 +180,95 @@ function awardPoints(studentId) {
     new bootstrap.Modal(document.getElementById('awardPointsModal')).show();
 }
 
-// View mode toggle
-document.getElementById('listView').addEventListener('change', function() {
-    if (this.checked) {
-        document.getElementById('studentsGrid').classList.add('row-cols-1');
-        document.querySelectorAll('.student-card').forEach(card => {
-            card.classList.add('d-flex', 'align-items-center');
-            card.querySelector('.student-avatar').style.fontSize = '2rem';
-            card.querySelector('.student-avatar').style.marginBottom = '0';
-            card.querySelector('.student-avatar').style.marginRight = '1rem';
+// Tab functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const studentsGrid = document.getElementById('studentsGrid');
+    const groupsTab = document.getElementById('groupsTab');
+    const statsTab = document.getElementById('statsTab');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const view = this.getAttribute('data-view');
+            
+            // Remove active class from all buttons
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Hide all content
+            studentsGrid.style.display = 'none';
+            groupsTab.style.display = 'none';
+            statsTab.style.display = 'none';
+            
+            // Show selected content
+            if (view === 'students') {
+                studentsGrid.style.display = 'block';
+                // Reset student cards to original layout
+                resetStudentCards();
+            } else if (view === 'groups') {
+                groupsTab.style.display = 'block';
+            } else if (view === 'stats') {
+                statsTab.style.display = 'block';
+            }
+    });
+
+    // Function to reset student cards to original layout
+    function resetStudentCards() {
+        const studentsGrid = document.getElementById('studentsGrid');
+        const studentCards = document.querySelectorAll('.student-card');
+        
+        // Remove any layout classes that might have been added
+        studentsGrid.classList.remove('row-cols-1');
+        
+        // Reset each student card to original state
+        studentCards.forEach(card => {
+            card.classList.remove('d-flex', 'align-items-center');
+            const avatar = card.querySelector('.student-avatar');
+            if (avatar) {
+                // Reset to original CSS values
+                avatar.style.fontSize = '2rem';
+                avatar.style.marginBottom = '0.75rem';
+                avatar.style.marginRight = '0';
+            }
+        });
+        
+        // Ensure the grid layout is properly restored
+        studentsGrid.style.display = 'grid';
+        studentsGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(140px, 1fr))';
+        studentsGrid.style.gap = '1rem';
+    }
+    });
+
+    // View mode toggle (only if elements exist)
+    const listView = document.getElementById('listView');
+    const gridView = document.getElementById('gridView');
+    
+    if (listView) {
+        listView.addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('studentsGrid').classList.add('row-cols-1');
+                document.querySelectorAll('.student-card').forEach(card => {
+                    card.classList.add('d-flex', 'align-items-center');
+                    card.querySelector('.student-avatar').style.fontSize = '2rem';
+                    card.querySelector('.student-avatar').style.marginBottom = '0';
+                    card.querySelector('.student-avatar').style.marginRight = '1rem';
+                });
+            }
         });
     }
-});
 
-document.getElementById('gridView').addEventListener('change', function() {
-    if (this.checked) {
-        document.getElementById('studentsGrid').classList.remove('row-cols-1');
-        document.querySelectorAll('.student-card').forEach(card => {
-            card.classList.remove('d-flex', 'align-items-center');
-            card.querySelector('.student-avatar').style.fontSize = '3rem';
-            card.querySelector('.student-avatar').style.marginBottom = '1rem';
-            card.querySelector('.student-avatar').style.marginRight = '0';
+    if (gridView) {
+        gridView.addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('studentsGrid').classList.remove('row-cols-1');
+                document.querySelectorAll('.student-card').forEach(card => {
+                    card.classList.remove('d-flex', 'align-items-center');
+                    card.querySelector('.student-avatar').style.fontSize = '3rem';
+                    card.querySelector('.student-avatar').style.marginBottom = '1rem';
+                    card.querySelector('.student-avatar').style.marginRight = '0';
+                });
+            }
         });
     }
 });
