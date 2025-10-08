@@ -251,6 +251,64 @@
         </div>
     </div>
 </div>
+
+<!-- Random Student Slot Machine Modal -->
+<div class="modal fade" id="randomStudentModal" tabindex="-1" aria-labelledby="randomStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="randomStudentModalLabel">
+                    <i class="fas fa-random me-2"></i>Random Student Selector
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="slot-machine-container">
+                    <div class="slot-machine-display">
+                        <div class="slot-machine-title">🎰 Random Student Selector 🎰</div>
+                        <div class="slot-machine-reel" id="slotMachineReel">
+                            <!-- Student cards will be dynamically inserted here -->
+                        </div>
+                        <div class="slot-machine-result" id="slotMachineResult" style="display: none;">
+                            <div class="selected-student-card">
+                                <div class="selected-student-avatar" id="selectedStudentAvatar"></div>
+                                <div class="selected-student-name" id="selectedStudentName"></div>
+                                <div class="selected-student-points" id="selectedStudentPoints"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="spinSlotMachineBtn">
+                    <i class="fas fa-play me-1"></i>Spin Again
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Selected Student Details Modal -->
+<div class="modal fade" id="selectedStudentModal" tabindex="-1" aria-labelledby="selectedStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="selectedStudentModalLabel">Student Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="selectedStudentModalBody">
+                <!-- Student details will be dynamically inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="awardPointsToSelectedBtn">
+                    <i class="fas fa-star me-1"></i>Award Points
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -488,7 +546,240 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Initialize slot machine functionality
+    initializeSlotMachine();
 });
+
+// Slot Machine Functionality
+let slotMachineStudents = [];
+let currentSlotIndex = 0;
+let slotMachineInterval = null;
+let selectedStudent = null;
+
+function initializeSlotMachine() {
+    // Get students data from the page
+    const studentCards = document.querySelectorAll('.student-card[data-student-id]');
+    slotMachineStudents = Array.from(studentCards).map(card => {
+        const studentId = parseInt(card.dataset.studentId);
+        const name = card.querySelector('.student-name').textContent;
+        const avatar = card.querySelector('.student-avatar').textContent;
+        const points = card.querySelector('.student-points').textContent;
+        const colorClass = card.querySelector('.student-avatar').className.match(/monster-\w+/)[0];
+        
+        return {
+            id: studentId,
+            name: name,
+            avatar: avatar,
+            points: points,
+            colorClass: colorClass
+        };
+    });
+    
+    // Add click handler for random button
+    const randomBtn = document.getElementById('randomBtn');
+    if (randomBtn) {
+        randomBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            openSlotMachine();
+        });
+    }
+    
+    // Add click handler for spin again button
+    const spinAgainBtn = document.getElementById('spinSlotMachineBtn');
+    if (spinAgainBtn) {
+        spinAgainBtn.addEventListener('click', function() {
+            startSlotMachine();
+        });
+    }
+    
+    // Add click handler for award points button in selected student modal
+    const awardPointsBtn = document.getElementById('awardPointsToSelectedBtn');
+    if (awardPointsBtn) {
+        awardPointsBtn.addEventListener('click', function() {
+            if (selectedStudent) {
+                awardPoints(selectedStudent.id);
+            }
+        });
+    }
+}
+
+function openSlotMachine() {
+    const modal = new bootstrap.Modal(document.getElementById('randomStudentModal'));
+    modal.show();
+    
+    // Reset the slot machine
+    resetSlotMachine();
+    
+    // Start the slot machine animation
+    setTimeout(() => {
+        startSlotMachine();
+    }, 500);
+}
+
+function resetSlotMachine() {
+    const reel = document.getElementById('slotMachineReel');
+    const result = document.getElementById('slotMachineResult');
+    
+    // Clear previous content
+    reel.innerHTML = '';
+    result.style.display = 'none';
+    
+    // Reset variables
+    currentSlotIndex = 0;
+    selectedStudent = null;
+    
+    // Clear any existing intervals
+    if (slotMachineInterval) {
+        clearInterval(slotMachineInterval);
+        slotMachineInterval = null;
+    }
+}
+
+function startSlotMachine() {
+    const reel = document.getElementById('slotMachineReel');
+    const result = document.getElementById('slotMachineResult');
+    
+    // Hide result
+    result.style.display = 'none';
+    
+    // Clear previous content
+    reel.innerHTML = '';
+    
+    // Add spinning class
+    reel.classList.add('spinning');
+    
+    // Create multiple student cards for the spinning effect
+    const numCards = 10; // Show 10 different student cards
+    const shuffledStudents = [...slotMachineStudents].sort(() => Math.random() - 0.5);
+    
+    for (let i = 0; i < numCards; i++) {
+        const student = shuffledStudents[i % shuffledStudents.length];
+        const card = createSlotStudentCard(student, i);
+        reel.appendChild(card);
+    }
+    
+    // Start the spinning animation
+    let currentIndex = 0;
+    const totalCards = reel.children.length;
+    
+    slotMachineInterval = setInterval(() => {
+        // Hide current card
+        if (reel.children[currentIndex]) {
+            reel.children[currentIndex].classList.remove('visible');
+        }
+        
+        // Show next card
+        currentIndex = (currentIndex + 1) % totalCards;
+        if (reel.children[currentIndex]) {
+            reel.children[currentIndex].classList.add('visible');
+        }
+    }, 150);
+    
+    // Stop after 3 seconds and select a random student
+    setTimeout(() => {
+        stopSlotMachine();
+    }, 3000);
+}
+
+function stopSlotMachine() {
+    const reel = document.getElementById('slotMachineReel');
+    const result = document.getElementById('slotMachineResult');
+    
+    // Clear interval
+    if (slotMachineInterval) {
+        clearInterval(slotMachineInterval);
+        slotMachineInterval = null;
+    }
+    
+    // Remove spinning class
+    reel.classList.remove('spinning');
+    
+    // Select a random student
+    const randomIndex = Math.floor(Math.random() * slotMachineStudents.length);
+    selectedStudent = slotMachineStudents[randomIndex];
+    
+    // Show the selected student
+    showSelectedStudent(selectedStudent);
+    
+    // Hide all cards in reel
+    Array.from(reel.children).forEach(card => {
+        card.classList.remove('visible');
+    });
+}
+
+function showSelectedStudent(student) {
+    const result = document.getElementById('slotMachineResult');
+    const avatar = document.getElementById('selectedStudentAvatar');
+    const name = document.getElementById('selectedStudentName');
+    const points = document.getElementById('selectedStudentPoints');
+    
+    // Update the result display
+    avatar.textContent = student.avatar;
+    avatar.className = `selected-student-avatar ${student.colorClass}`;
+    name.textContent = student.name;
+    points.textContent = student.points;
+    
+    // Show the result
+    result.style.display = 'block';
+    
+    // Show the selected student details modal after a short delay
+    setTimeout(() => {
+        showSelectedStudentModal(student);
+    }, 1000);
+}
+
+function showSelectedStudentModal(student) {
+    const modalBody = document.getElementById('selectedStudentModalBody');
+    
+    // Create student details content
+    modalBody.innerHTML = `
+        <div class="text-center">
+            <div class="selected-student-avatar ${student.colorClass}" style="width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; margin: 0 auto 1rem; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border: 3px solid #dee2e6;">
+                ${student.avatar}
+            </div>
+            <h4 class="mb-3">${student.name}</h4>
+            <div class="row">
+                <div class="col-6">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">${student.points}</h5>
+                            <p class="card-text">Points</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-success">Active</h5>
+                            <p class="card-text">Status</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('selectedStudentModal'));
+    modal.show();
+}
+
+function createSlotStudentCard(student, index) {
+    const card = document.createElement('div');
+    card.className = 'slot-student-card';
+    card.style.zIndex = 10 - index; // Stack cards properly
+    
+    card.innerHTML = `
+        <div class="slot-student-avatar ${student.colorClass}">
+            ${student.avatar}
+        </div>
+        <div class="slot-student-name">${student.name}</div>
+        <div class="slot-student-points">${student.points}</div>
+    `;
+    
+    return card;
+}
 
 // Tab functionality
 document.addEventListener('DOMContentLoaded', function() {

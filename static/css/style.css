@@ -1017,3 +1017,467 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #3A7BC8;
 }
+
+/* Timer Modal Styles */
+.timer-modal-dialog {
+    max-width: 400px;
+    width: 90%;
+    margin: 1.75rem auto;
+    position: relative;
+}
+
+.timer-modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    resize: both;
+    overflow: auto;
+    min-width: 350px;
+    min-height: 300px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Draggable modal styles */
+.timer-modal-dialog.draggable {
+    position: fixed !important;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    z-index: 1055;
+}
+
+.timer-modal-content.draggable {
+    cursor: move;
+}
+
+.timer-modal-header.draggable {
+    cursor: move;
+    user-select: none;
+}
+
+.timer-modal-header.draggable:hover {
+    background: linear-gradient(135deg, #3A7BC8, #6BC41A);
+}
+
+.timer-modal-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: 12px 12px 0 0;
+    border-bottom: none;
+    padding: 1rem 1.5rem;
+}
+
+.timer-modal-header .btn-close {
+    filter: invert(1);
+}
+
+.timer-modal-body {
+    padding: 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 250px;
+}
+
+.timer-display {
+    margin-bottom: 1rem;
+    /* Allow the timer display to take up most of the available space */
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 3rem;
+    /* Use more of the available height but leave space for controls */
+    max-height: 60vh;
+    /* Ensure it doesn't overlap with controls */
+    overflow: hidden;
+    position: relative;
+}
+
+.timer-time {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--dark-text);
+    margin-bottom: 0.5rem;
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: font-size 0.2s ease, transform 0.2s ease;
+    line-height: 1;
+    /* Allow the timer to scale but with constraints */
+    min-height: 2rem;
+    max-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Prevent overflow and ensure it fits in its container */
+    word-break: keep-all;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.timer-status {
+    font-size: 1rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.timer-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    /* Keep controls at fixed size but use less space */
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.timer-add-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.timer-add-btn {
+    min-width: 60px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    /* Keep buttons at fixed size regardless of modal resizing */
+    flex-shrink: 0;
+}
+
+.timer-add-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.timer-main-buttons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.timer-main-buttons .btn {
+    min-width: 100px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    /* Keep main buttons at fixed size regardless of modal resizing */
+    flex-shrink: 0;
+}
+
+.timer-main-buttons .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.timer-main-buttons .btn:disabled {
+    transform: none;
+    box-shadow: none;
+    opacity: 0.6;
+}
+
+/* Timer running animation */
+.timer-running .timer-time {
+    color: var(--success-color);
+    animation: pulse 2s infinite;
+}
+
+.timer-paused .timer-time {
+    color: var(--warning-color);
+}
+
+.timer-finished .timer-time {
+    color: var(--danger-color);
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Responsive timer modal */
+@media (max-width: 576px) {
+    .timer-modal-dialog {
+        width: 95%;
+        margin: 1rem auto;
+    }
+    
+    .timer-modal-content {
+        min-width: 300px;
+        min-height: 250px;
+    }
+    
+    .timer-time {
+        font-size: 2.5rem;
+    }
+    
+    .timer-add-buttons {
+        gap: 0.25rem;
+    }
+    
+    .timer-add-btn {
+        min-width: 50px;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .timer-main-buttons {
+        gap: 0.5rem;
+    }
+    
+    .timer-main-buttons .btn {
+        min-width: 80px;
+        font-size: 0.875rem;
+    }
+}
+
+/* Slot Machine Styles */
+.slot-machine-container {
+    text-align: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 12px;
+    margin: 1rem 0;
+}
+
+.slot-machine-display {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 3px solid #dee2e6;
+}
+
+.slot-machine-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.slot-machine-reel {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    margin-bottom: 1rem;
+}
+
+.slot-machine-reel.spinning {
+    animation: slotSpin 2s ease-in-out;
+}
+
+.slot-student-card {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(100%);
+}
+
+.slot-student-card.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.slot-student-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.slot-student-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border: 3px solid #dee2e6;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.slot-student-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dark-text);
+    margin-bottom: 0.5rem;
+}
+
+.slot-student-points {
+    background-color: var(--success-color);
+    color: white;
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.slot-machine-result {
+    text-align: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 12px;
+    color: white;
+    margin-top: 1rem;
+    animation: resultAppear 0.5s ease-out;
+}
+
+.selected-student-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.selected-student-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.selected-student-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.selected-student-points {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Slot Machine Animations */
+@keyframes slotSpin {
+    0% {
+        transform: translateY(0);
+    }
+    25% {
+        transform: translateY(-25%);
+    }
+    50% {
+        transform: translateY(-50%);
+    }
+    75% {
+        transform: translateY(-75%);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@keyframes resultAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes cardSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes cardSlideOut {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+}
+
+/* Slot machine card transitions */
+.slot-student-card.slide-in {
+    animation: cardSlideIn 0.3s ease-out;
+}
+
+.slot-student-card.slide-out {
+    animation: cardSlideOut 0.3s ease-out;
+}
+
+/* Responsive slot machine */
+@media (max-width: 768px) {
+    .slot-machine-container {
+        padding: 1rem;
+    }
+    
+    .slot-machine-display {
+        padding: 1rem;
+    }
+    
+    .slot-machine-reel {
+        height: 150px;
+    }
+    
+    .slot-student-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+    }
+    
+    .slot-student-name {
+        font-size: 1rem;
+    }
+    
+    .selected-student-avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 2.5rem;
+    }
+    
+    .selected-student-name {
+        font-size: 1.25rem;
+    }
+}

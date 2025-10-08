@@ -189,13 +189,55 @@
                 <i class="fas fa-check-square"></i>
                 <span>Select multiple</span>
             </div>
-            <div class="footer-item">
+            <div class="footer-item" id="randomBtn" data-bs-toggle="modal" data-bs-target="#randomStudentModal">
                 <i class="fas fa-random"></i>
                 <span>Random</span>
             </div>
-            <div class="footer-item">
+            <div class="footer-item" id="timerBtn" data-bs-toggle="modal" data-bs-target="#timerModal">
                 <i class="fas fa-stopwatch"></i>
                 <span>Timer</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timer Modal -->
+    <div class="modal fade" id="timerModal" tabindex="-1" aria-labelledby="timerModalLabel" aria-hidden="true">
+        <div class="modal-dialog timer-modal-dialog">
+            <div class="modal-content timer-modal-content">
+                <div class="modal-header timer-modal-header">
+                    <h5 class="modal-title" id="timerModalLabel">
+                        <i class="fas fa-stopwatch me-2"></i>Countdown Timer
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body timer-modal-body">
+                    <div class="timer-display">
+                        <div class="timer-time" id="timerDisplay">00:00</div>
+                        <div class="timer-status" id="timerStatus">Ready</div>
+                    </div>
+                    
+                    <div class="timer-controls">
+                        <div class="timer-add-buttons">
+                            <button type="button" class="btn btn-outline-primary btn-sm timer-add-btn" data-seconds="10">+10s</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm timer-add-btn" data-seconds="30">+30s</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm timer-add-btn" data-seconds="60">+1m</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm timer-add-btn" data-seconds="300">+5m</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm timer-add-btn" data-seconds="600">+10m</button>
+                        </div>
+                        
+                        <div class="timer-main-buttons">
+                            <button type="button" class="btn btn-success" id="startTimerBtn">
+                                <i class="fas fa-play me-1"></i>Start
+                            </button>
+                            <button type="button" class="btn btn-warning" id="pauseTimerBtn" disabled>
+                                <i class="fas fa-pause me-1"></i>Pause
+                            </button>
+                            <button type="button" class="btn btn-danger" id="resetTimerBtn">
+                                <i class="fas fa-stop me-1"></i>Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
