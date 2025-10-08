@@ -34,7 +34,7 @@ body {
 .sidebar {
     width: var(--sidebar-width);
     background-color: #f8f9fa;
-    border-right: 1px solid var(--border-color);
+    border-right: 4px solid var(--border-color);
     display: flex;
     flex-direction: column;
     position: fixed;
@@ -49,6 +49,8 @@ body {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    height: 80px;
+    box-sizing: border-box;
 }
 
 .school-logo .monster-avatar {
@@ -124,6 +126,15 @@ body {
 .sidebar-classes {
     padding: 1rem;
     border-top: 1px solid var(--border-color);
+}
+
+/* Thicker divider between classes and navigation */
+.sidebar-divider {
+    border: none;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+    margin: 1rem 0;
+    opacity: 0.8;
 }
 
 .classes-title {
@@ -202,6 +213,10 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    height: var(--footer-height);
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
 }
 
 .footer-link {
@@ -237,7 +252,11 @@ body {
 .top-navbar {
     background: white;
     border-bottom: 1px solid var(--border-color);
-    padding: 1rem 2rem;
+    padding: 1.5rem 2rem;
+    height: 80px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
 }
 
 .navbar-content {
