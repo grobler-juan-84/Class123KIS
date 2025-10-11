@@ -289,6 +289,10 @@ Icon?
 ehthumbs.db
 Thumbs.db
 
+
+# Local environment variables
+.env.local
+
 # Project specific
 # Add any project-specific files or directories you want to ignore
 # For example:
