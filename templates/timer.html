@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}Timer - ClassDojo Clone{% endblock %}
+
+{% block content %}
+<div class="timer-page">
+    <div class="timer-container">
+        <div class="timer-display">
+            <div class="timer-time" id="timerDisplay">00:00</div>
+            <div class="timer-status" id="timerStatus">Ready</div>
+        </div>
+        
+        <div class="timer-controls">
+            <div class="timer-add-buttons">
+                <button type="button" class="btn btn-outline-primary timer-add-btn" data-seconds="10">+10s</button>
+                <button type="button" class="btn btn-outline-primary timer-add-btn" data-seconds="30">+30s</button>
+                <button type="button" class="btn btn-outline-primary timer-add-btn" data-seconds="60">+1m</button>
+                <button type="button" class="btn btn-outline-primary timer-add-btn" data-seconds="300">+5m</button>
+                <button type="button" class="btn btn-outline-primary timer-add-btn" data-seconds="600">+10m</button>
+            </div>
+            
+            <div class="timer-main-buttons">
+                <button type="button" class="btn btn-success" id="startTimerBtn">
+                    <i class="fas fa-play me-1"></i>Start
+                </button>
+                <button type="button" class="btn btn-warning" id="pauseTimerBtn" disabled>
+                    <i class="fas fa-pause me-1"></i>Pause
+                </button>
+                <button type="button" class="btn btn-danger" id="resetTimerBtn">
+                    <i class="fas fa-stop me-1"></i>Reset
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Timer functionality
+let timerInterval = null;
+let timerSeconds = 0;
+let isRunning = false;
+let isPaused = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTimer();
+});
+
+function initializeTimer() {
+    const timerDisplay = document.getElementById('timerDisplay');
+    const timerStatus = document.getElementById('timerStatus');
+    const startBtn = document.getElementById('startTimerBtn');
+    const pauseBtn = document.getElementById('pauseTimerBtn');
+    const resetBtn = document.getElementById('resetTimerBtn');
+    const addButtons = document.querySelectorAll('.timer-add-btn');
+    
+    if (!timerDisplay || !timerStatus || !startBtn || !pauseBtn || !resetBtn) {
+        return; // Elements not found, skip initialization
+    }
+    
+    // Add time buttons
+    addButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const seconds = parseInt(this.dataset.seconds);
+            addTime(seconds);
+        });
+    });
+    
+    // Start button
+    startBtn.addEventListener('click', function() {
+        if (timerSeconds > 0) {
+            startTimer();
+        }
+    });
+    
+    // Pause button
+    pauseBtn.addEventListener('click', function() {
+        if (isRunning) {
+            pauseTimer();
+        }
+    });
+    
+    // Reset button
+    resetBtn.addEventListener('click', function() {
+        resetTimer();
+    });
+    
+    // Initialize display
+    updateTimerDisplay();
+}
+
+function addTime(seconds) {
+    timerSeconds += seconds;
+    updateTimerDisplay();
+    updateButtonStates();
+}
+
+function startTimer() {
+    if (timerSeconds <= 0) return;
+    
+    isRunning = true;
+    isPaused = false;
+    
+    timerInterval = setInterval(() => {
+        timerSeconds--;
+        updateTimerDisplay();
+        updateButtonStates();
+        
+        if (timerSeconds <= 0) {
+            finishTimer();
+        }
+    }, 1000);
+    
+    updateTimerStatus('Running');
+    addTimerClass('timer-running');
+}
+
+function pauseTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    
+    isRunning = false;
+    isPaused = true;
+    
+    updateTimerStatus('Paused');
+    addTimerClass('timer-paused');
+    updateButtonStates();
+}
+
+function resetTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    
+    timerSeconds = 0;
+    isRunning = false;
+    isPaused = false;
+    
+    updateTimerDisplay();
+    updateTimerStatus('Ready');
+    removeTimerClasses();
+    updateButtonStates();
+}
+
+function finishTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    
+    isRunning = false;
+    isPaused = false;
+    
+    updateTimerStatus('Finished!');
+    addTimerClass('timer-finished');
+    updateButtonStates();
+    
+    // Play sound
+    playTimerSound();
+}
+
+function updateTimerDisplay() {
+    const timerDisplay = document.getElementById('timerDisplay');
+    if (timerDisplay) {
+        const minutes = Math.floor(timerSeconds / 60);
+        const seconds = timerSeconds % 60;
+        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+}
+
+function updateTimerStatus(status) {
+    const timerStatus = document.getElementById('timerStatus');
+    if (timerStatus) {
+        timerStatus.textContent = status;
+    }
+}
+
+function updateButtonStates() {
+    const startBtn = document.getElementById('startTimerBtn');
+    const pauseBtn = document.getElementById('pauseTimerBtn');
+    const resetBtn = document.getElementById('resetTimerBtn');
+    
+    if (startBtn) {
+        startBtn.disabled = timerSeconds <= 0 || isRunning;
+    }
+    
+    if (pauseBtn) {
+        pauseBtn.disabled = !isRunning;
+    }
+    
+    if (resetBtn) {
+        resetBtn.disabled = timerSeconds <= 0 && !isRunning && !isPaused;
+    }
+}
+
+function addTimerClass(className) {
+    const timerPage = document.querySelector('.timer-page');
+    if (timerPage) {
+        removeTimerClasses();
+        timerPage.classList.add(className);
+    }
+}
+
+function removeTimerClasses() {
+    const timerPage = document.querySelector('.timer-page');
+    if (timerPage) {
+        timerPage.classList.remove('timer-running', 'timer-paused', 'timer-finished');
+    }
+}
+
+function playTimerSound() {
+    // Create a simple beep sound using Web Audio API
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
+    } catch (e) {
+        console.log('Audio not supported');
+    }
+}
+</script>
+{% endblock %}
+

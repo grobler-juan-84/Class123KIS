@@ -1466,6 +1466,203 @@ body {
     animation: cardSlideOut 0.3s ease-out;
 }
 
+/* Timer Page Styles */
+.timer-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 200px);
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+}
+
+.timer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 1200px;
+    gap: 3rem;
+}
+
+.timer-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 50vh;
+    background: white;
+    border-radius: 30px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    padding: 4rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.timer-time {
+    font-size: 20rem;
+    font-weight: 900;
+    color: var(--dark-text);
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    line-height: 0.7;
+    letter-spacing: 0.2em;
+    margin: 0;
+    text-align: center;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 20px;
+    padding: 2rem 4rem;
+    border: 6px solid #dee2e6;
+    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 1000px;
+}
+
+.timer-status {
+    font-size: 2rem;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.timer-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+    max-width: 800px;
+}
+
+.timer-add-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.timer-add-btn {
+    min-width: 100px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.timer-add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.timer-main-buttons {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.timer-main-buttons .btn {
+    min-width: 150px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding: 1.5rem 2rem;
+    border-radius: 15px;
+    transition: all 0.2s ease;
+}
+
+.timer-main-buttons .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Timer state animations */
+.timer-running .timer-time {
+    color: var(--success-color);
+    animation: pulse 2s infinite;
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    border-color: var(--success-color);
+    box-shadow: 0 20px 80px rgba(126, 211, 33, 0.4);
+}
+
+.timer-paused .timer-time {
+    color: var(--warning-color);
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    border-color: var(--warning-color);
+    box-shadow: 0 20px 80px rgba(245, 166, 35, 0.4);
+}
+
+.timer-finished .timer-time {
+    color: var(--danger-color);
+    animation: shake 0.5s ease-in-out;
+    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+    border-color: var(--danger-color);
+    box-shadow: 0 20px 80px rgba(208, 2, 27, 0.4);
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        transform: scale(1); 
+        box-shadow: 0 20px 80px rgba(126, 211, 33, 0.4);
+    }
+    50% { 
+        transform: scale(1.1); 
+        box-shadow: 0 30px 120px rgba(126, 211, 33, 0.6);
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+/* Responsive timer page */
+@media (max-width: 768px) {
+    .timer-page {
+        padding: 1rem;
+    }
+    
+    .timer-display {
+        min-height: 40vh;
+        padding: 2rem;
+    }
+    
+    .timer-time {
+        font-size: 12rem;
+        padding: 1rem 2rem;
+    }
+    
+    .timer-status {
+        font-size: 1.5rem;
+    }
+    
+    .timer-add-buttons {
+        gap: 0.5rem;
+    }
+    
+    .timer-add-btn {
+        min-width: 80px;
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+    }
+    
+    .timer-main-buttons {
+        gap: 1rem;
+    }
+    
+    .timer-main-buttons .btn {
+        min-width: 120px;
+        font-size: 1.2rem;
+        padding: 1rem 1.5rem;
+    }
+}
+
 /* Responsive slot machine */
 @media (max-width: 768px) {
     .slot-machine-container {
