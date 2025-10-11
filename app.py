@@ -137,6 +137,11 @@ def student_view(student_id):
                          skills=DUMMY_DATA['skills'],
                          classes=DUMMY_DATA['classes'])
 
+@app.route('/timer')
+def timer_view():
+    """Timer page"""
+    return render_template('timer.html', classes=DUMMY_DATA['classes'])
+
 @app.route('/award_points', methods=['POST'])
 def award_points():
     """Award points to a student, multiple students, or whole class (dummy implementation)"""

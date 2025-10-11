@@ -1,0 +1,12 @@
+# Git and IDE folders
+.git
+.gitignore
+.vscode/
+
+# Python virtual environment and cache
+.venv
+__pycache__/
+
+# Docker files
+Dockerfile
+.dockerignore
